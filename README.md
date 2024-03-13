@@ -57,19 +57,19 @@ yarn install
 ````
             yarn dev
  ````
-- Usage
+## Usage
 Visit http://localhost:8888/api/v1 in your browser.
 Sign up or log in with existing credentials.
 Explore features, upload media, and connect with friends.
 
-5. **Database**
+## Database
 ![social-netWork.svg](social-netWork.svg)
 
-6. **Testing**
+## Testing
 - Ensure code reliability with Pactum for API testing.
 
-7**Contribution**
+## Contribution
 - Contributions are welcome! Please follow our Contribution Guidelines.
 
-8**License**
+## License
 - This project is licensed under the MIT License.

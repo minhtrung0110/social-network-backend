@@ -8,7 +8,7 @@ services:
       - 5434:5432 #{port in host(myPC)} : {port in Container}
     #environment variables, like: db's username, password...
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: minhtrung
       POSTGRES_PASSWORD: Minhtrung0110
       POSTGRES_DB: social-network
     networks:

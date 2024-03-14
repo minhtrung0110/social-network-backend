@@ -15,29 +15,33 @@ datasource db {
 
 // modify Database Scheme
 model User {
-  id                Int                @id @default(autoincrement())
-  username          String             @unique
-  email             String             @unique @db.VarChar(256)
-  password          String?            @db.VarChar(256)
-  token             String?            @db.VarChar(256)
-  firstName         String?            @db.VarChar(256)
-  lastName          String?            @db.VarChar(256)
-  birthday          String?            @db.VarChar(256)
-  gender            String?            @db.VarChar(256)
-  phoneNumber       String?            @db.VarChar(256)
-  address           String?            @db.VarChar(256)
-  avatar            String?            @db.VarChar(256)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  followedBy        Follow[]           @relation("user_followed")
-  following         Follow[]           @relation("follow_user")
-  savePost          Saved[]            @relation("save_post_user")
-  comments          Comment[]          @relation("user_comment")
-  userGroup         UserGroup[]        @relation("user_in_group")
-  messages          Message[]          @relation("user's_message")
-  userConservations UserConversation[] @relation("user_in_conversation")
-  likes             Like[]             @relation("user_like_post")
-  userPosts         Post[]             @relation("user_post")
+  id               Int                @id @default(autoincrement())
+  username         String             @unique
+  email            String             @unique @db.VarChar(256)
+  password         String?            @db.VarChar(256)
+  token            String?            @db.VarChar(256)
+  firstName        String?            @db.VarChar(256)
+  lastName         String?            @db.VarChar(256)
+  birthday         String?            @db.VarChar(256)
+  gender           String?            @db.VarChar(256)
+  phoneNumber      String?            @db.VarChar(256)
+  address          String?            @db.VarChar(256)
+  avatar           String?            @db.VarChar(256)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  followedBy       Follow[]           @relation("user_followed")
+  following        Follow[]           @relation("follow_user")
+  Post             Post[]             @relation("user_post")
+  Like             Like[]             @relation("user_like_post")
+  Saved            Saved[]            @relation("save_post_user")
+  Message          Message[]          @relation("user's_message")
+  UserGroup        UserGroup[]        @relation("user_in_group")
+  UserConversation UserConversation[] @relation("user_in_conversation")
+  Comment          Comment[]          @relation("user_comment")
+  Comment          Comment[]
+  UserGroup        UserGroup[]
+  UserConversation UserConversation[]
+
   // More
   @@map("users") // users id "table's name" in Postgres SQL
 }
@@ -48,7 +52,7 @@ model Post {
   tags      String?   @db.VarChar(256)
   imageUrl  String?   @db.VarChar(256)
   scopeId   Int
-  scope     Scope?    @relation("post_scope", fields: [scopeId], references: [id])
+  scope     Scope?    @relation(fields: [scopeId], references: [id])
   userId    Int?
   user      User?     @relation("user_post", fields: [userId], references: [id])
   Like      Like[]    @relation("post_liked")
@@ -56,8 +60,8 @@ model Post {
   status    Int
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  // relationship
-  postSaved Saved[]   @relation("save_user_post")
+  Saved     Saved[]   @relation("save_user_post")
+  Saved     Saved[]
 
   // more
   @@map("posts")
@@ -68,8 +72,8 @@ model Scope {
   name      String   @db.VarChar(256)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  // relationship
-  posts     Post[]   @relation("post_scope")
+  Post      Post[]
+
   // More
   @@map("scopes")
 }
@@ -94,6 +98,7 @@ model Saved {
   post      Post?    @relation("save_user_post", fields: [postId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Post      Post     @relation(fields: [postId], references: [id])
 
   @@id([userId, postId])
   // More
@@ -115,28 +120,34 @@ model Follow {
 }
 
 model Comment {
-  id        Int      @id @default(autoincrement())
-  content   String   @db.VarChar(256)
+  id        Int       @id @default(autoincrement())
+  content   String    @db.VarChar(256)
   userId    Int
-  user      User?    @relation("user_comment", fields: [userId], references: [id])
+  user      User?     @relation("user_comment", fields: [userId], references: [id])
   postId    Int
-  post      Post?    @relation("user_comment_post", fields: [postId], references: [id])
+  post      Post?     @relation("user_comment_post", fields: [postId], references: [id])
   replyId   Int?
-  // reply     Comment? @relation("reply_comment_relation", fields: [replyId], references: [id])
-  // self      Comment  @relation("reply_comment_relation")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  // relationship
+  reply     Comment?  @relation("reply_comment_relation", fields: [replyId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  comments  Comment[] @relation("reply_comment_relation")
+  User      User      @relation(fields: [userId], references: [id])
+
   // More
   @@map("comments")
 }
 
 model Group {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(256)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  // groupUser UserGroup @relation("group")
+  id               Int         @id @default(autoincrement())
+  name             String      @db.VarChar(256)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  UserGroup        UserGroup   @relation("user_in_group", fields: [userGroupUserId, userGroupGroupId], references: [userId, groupId])
+  userGroupUserId  Int
+  userGroupGroupId Int
+  UserGroup        UserGroup[]
+  UserGroup        UserGroup[]
+
   // More
   @@map("groups")
 }
@@ -145,9 +156,12 @@ model UserGroup {
   userId    Int
   user      User?    @relation("user_in_group", fields: [userId], references: [id])
   groupId   Int
-  // group     Group?   @relation("group", fields: [groupId], references: [id])
+  group     Group?   @relation("group", fields: [groupId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id])
+  Group     Group    @relation(fields: [groupId], references: [id])
+  Group     Group[]
 
   @@id([userId, groupId])
   // More
@@ -169,15 +183,15 @@ model Message {
 }
 
 model Conversation {
-  id                Int                @id @default(autoincrement())
-  title             String             @db.VarChar(256)
-  icon              String             @db.VarChar(256)
-  theme             String             @db.VarChar(256)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  messages          Message[]          @relation("conversation's_message")
-  // relationships
-  conversationUsers UserConversation[] @relation("conversation")
+  id               Int                @id @default(autoincrement())
+  title            String             @db.VarChar(256)
+  icon             String             @db.VarChar(256)
+  theme            String             @db.VarChar(256)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  Message          Message[]          @relation("conversation's_message")
+  UserConversation UserConversation[] @relation("conversation")
+  UserConversation UserConversation[]
 
   // More
   @@map("conversations")
@@ -190,6 +204,8 @@ model UserConversation {
   conversation   Conversation? @relation("conversation", fields: [conversationId], references: [id])
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  User           User          @relation(fields: [userId], references: [id])
+  Conversation   Conversation  @relation(fields: [conversationId], references: [id])
 
   @@id([userId, conversationId])
   // More

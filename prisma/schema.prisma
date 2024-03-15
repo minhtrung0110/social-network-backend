@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "db-client-js"
 }
 
 datasource db {
@@ -16,9 +16,9 @@ datasource db {
 // modify Database Scheme
 model User {
   id                Int                @id @default(autoincrement())
-  username          String             @unique
+  username          String?            @unique
   email             String             @unique @db.VarChar(256)
-  password          String?            @db.VarChar(256)
+  password          String             @db.VarChar(256)
   token             String?            @db.VarChar(256)
   firstName         String?            @db.VarChar(256)
   lastName          String?            @db.VarChar(256)
@@ -27,8 +27,8 @@ model User {
   phoneNumber       String?            @db.VarChar(256)
   address           String?            @db.VarChar(256)
   avatar            String?            @db.VarChar(256)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  createdAt         DateTime?          @default(now())
+  updatedAt         DateTime?          @updatedAt
   followedBy        Follow[]           @relation("user_followed")
   following         Follow[]           @relation("follow_user")
   savePost          Saved[]            @relation("save_post_user")
@@ -48,7 +48,7 @@ model Post {
   tags      String?   @db.VarChar(256)
   imageUrl  String?   @db.VarChar(256)
   scopeId   Int
-  scope     Scope?    @relation("post_scope", fields: [scopeId], references: [id])
+  scope     Scope? //@relation("post_scope", fields: [scopeId], references: [id])
   userId    Int?
   user      User?     @relation("user_post", fields: [userId], references: [id])
   Like      Like[]    @relation("post_liked")
@@ -63,15 +63,20 @@ model Post {
   @@map("posts")
 }
 
-model Scope {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(256)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  // relationship
-  posts     Post[]   @relation("post_scope")
-  // More
-  @@map("scopes")
+// model Scope {
+//   id        Int      @id @default(autoincrement())
+//   name      String   @db.VarChar(256)
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   // relationship
+//   posts     Post[]   @relation("post_scope")
+//   // More
+//   @@map("scopes")
+// }
+enum Scope {
+  private
+  public
+  follower
 }
 
 model Like {

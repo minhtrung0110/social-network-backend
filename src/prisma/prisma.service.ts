@@ -14,9 +14,12 @@ export class PrismaService extends PrismaClient {
           url: configService.get('DATABASE_URL'),
         },
       },
+      log: [{ level: 'query', emit: 'event' }],
     });
+
     console.log('db url :' + configService.get('DATABASE_URL'));
   }
+
   cleanDatabase() {
     //In a 1 - N relation, delete N firstly, then delete "1"
     console.log('cleanDatabase');

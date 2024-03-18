@@ -27,6 +27,7 @@ model User {
   phoneNumber       String?            @db.VarChar(256)
   address           String?            @db.VarChar(256)
   avatar            String?            @db.VarChar(256)
+  status            Int
   createdAt         DateTime?          @default(now())
   updatedAt         DateTime?          @updatedAt
   followedBy        Follow[]           @relation("user_followed")

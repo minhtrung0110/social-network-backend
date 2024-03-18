@@ -1,17 +1,37 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
 import { MyJwtGuard } from '../auth/guard/myjwt.guard';
 import { User } from '@prisma/client';
 import { GetUser } from '../auth/decorator/user.decorator';
+import { UserService } from './user.service';
+import { Request } from 'express';
 
 @Controller('user')
+@UseGuards(MyJwtGuard)
 export class UserController {
-  constructor() {}
+  constructor(private userService: UserService) {}
   //path : .../users/me
   //@UseGuards(AuthGuard('jwt'))
-  @UseGuards(MyJwtGuard) //you can also make your own "decorator"
+  //you can also make your own "decorator"
   @Get('me')
+  // @GetUser() is a custom decorator
   me(@GetUser() user: User) {
-    //console.log(request.user) //where is it come from ?
     return user;
+  }
+  @Get(':id')
+  getUser(@Param('id') id: string) {
+    return this.userService.getUserById(Number(id));
+  }
+  @Get()
+  findUserWithConditions(@Req() request: Request) {
+    const { query } = request;
+    return this.userService.getByCondition(query);
+  }
+  @Patch(':id')
+  updateUser(@Param('id') id: string, @Body() user) {
+    return this.userService.updateUser(Number(id), user);
+  }
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.userService.deleteUser(id);
   }
 }

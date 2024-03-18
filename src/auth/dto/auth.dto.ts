@@ -13,6 +13,7 @@ export class UserDTO {
   phoneNumber: string;
   address: string;
   avatar: string;
+  status: number;
 }
 
 export class CreateUserDTO {
@@ -23,6 +24,7 @@ export class CreateUserDTO {
   birthday: string;
   gender: string;
   @IsNotEmpty() phoneNumber: string;
+  status: number;
 }
 
 export class AuthDTO {

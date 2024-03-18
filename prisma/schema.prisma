@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "db-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -48,7 +48,6 @@ model Post {
   caption   String    @db.VarChar(256)
   tags      String?   @db.VarChar(256)
   imageUrl  String?   @db.VarChar(256)
-  scopeId   Int
   scope     Scope? //@relation("post_scope", fields: [scopeId], references: [id])
   userId    Int?
   user      User?     @relation("user_post", fields: [userId], references: [id])
@@ -140,6 +139,7 @@ model Comment {
 model Group {
   id        Int      @id @default(autoincrement())
   name      String   @db.VarChar(256)
+  status    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   // groupUser UserGroup @relation("group")
@@ -167,6 +167,7 @@ model Message {
   user           User?         @relation("user's_message", fields: [userId], references: [id])
   conversationId Int
   conversation   Conversation? @relation("conversation's_message", fields: [conversationId], references: [id])
+  status         Int
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
@@ -179,6 +180,7 @@ model Conversation {
   title             String             @db.VarChar(256)
   icon              String             @db.VarChar(256)
   theme             String             @db.VarChar(256)
+  status            Int
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   messages          Message[]          @relation("conversation's_message")

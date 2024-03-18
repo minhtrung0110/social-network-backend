@@ -28,6 +28,7 @@ export class AuthService {
           firstName: createUserDTO.firstName,
           lastName: createUserDTO.lastName,
           phoneNumber: createUserDTO.phoneNumber,
+          status: 1,
         },
         //only select id, email, createdAt
         select: {

@@ -48,7 +48,7 @@ export class UserService {
   }
 
   async getByCondition(params: UserSearch) {
-    console.log('Parameters:', params);
+    //console.log('Parameters:', params);
     try {
       const result = await this.prismaService.user.findMany({
         where: {

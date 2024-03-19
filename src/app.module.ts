@@ -14,6 +14,8 @@ import { ConversationModule } from './conversation/conversation.module';
 import { LikeModule } from './like/like.module';
 import { SavedModule } from './saved/saved.module';
 import { FollowModule } from './follow/follow.module';
+import { UserconversationController } from './userconversation/userconversation.controller';
+import { UserconversationModule } from './userconversation/userconversation.module';
 
 @Module({
   imports: [
@@ -30,8 +32,9 @@ import { FollowModule } from './follow/follow.module';
     LikeModule,
     SavedModule,
     FollowModule,
+    UserconversationModule,
   ],
-  controllers: [AppController, PostController],
+  controllers: [AppController, PostController, UserconversationController],
   providers: [AppService, PostService],
 })
 export class AppModule {}

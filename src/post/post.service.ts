@@ -28,7 +28,25 @@ export class PostService {
               avatar: true,
             },
           },
-          Like: true,
+          Like: {
+            select: {
+              userId: true,
+            },
+          },
+          comments: {
+            select: {
+              content: true,
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  username: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
           status: true,
           createdAt: true,
         },
@@ -64,7 +82,11 @@ export class PostService {
               avatar: true,
             },
           },
-          Like: true,
+          Like: {
+            select: {
+              userId: true,
+            },
+          },
           status: true,
         },
       });

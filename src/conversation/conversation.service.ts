@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiResponse } from '../common/model';
+import { convertNumbers } from '../utils/common';
 
 @Injectable()
 export class ConversationService {
@@ -32,10 +33,12 @@ export class ConversationService {
     }
   }
   async filter(params: any) {
+    const filter = convertNumbers(params);
     try {
       const result = await this.prismaService.conversation.findMany({
-        where: { ...params, status: 1 },
+        where: { ...filter, status: 1 },
         select: {
+          id: true,
           title: true,
           icon: true,
           theme: true,
@@ -59,7 +62,7 @@ export class ConversationService {
   async create(conversation) {
     try {
       const result = await this.prismaService.conversation.create({
-        data: conversation,
+        data: { ...conversation, status: 1 },
       });
       return ApiResponse.success(result, 'Create conversation successful');
     } catch (err) {

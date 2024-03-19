@@ -68,6 +68,16 @@ export class UserService {
           phoneNumber: true,
           address: true,
           avatar: true,
+          following: {
+            select: {
+              userId: true,
+            },
+          },
+          followedBy: {
+            select: {
+              followId: true,
+            },
+          },
         },
       });
       return ApiResponse.success(result, 'Filter data successfully');

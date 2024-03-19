@@ -1,5 +1,5 @@
 export interface ParamObj {
-  [key: string]: string | number;
+  [key: string]: string | number | any;
 }
 
 export function convertNumbers(obj: ParamObj): ParamObj {

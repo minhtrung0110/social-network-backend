@@ -1,16 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiResponse } from '../common/model';
+import { convertNumbers } from '../utils/common';
 
 @Injectable()
 export class CommentService {
   constructor(private prismaService: PrismaService) {}
 
   async filter(params) {
+    const filter = convertNumbers(params);
+    console.log(filter);
     try {
       const result = await this.prismaService.comment.findMany({
         where: {
-          ...params,
+          ...filter,
         },
       });
       return ApiResponse.success(result, 'Filter comment successful');

@@ -5,8 +5,6 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
-import { PostController } from './post/post.controller';
-import { PostService } from './post/post.service';
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { MessageModule } from './message/message.module';
@@ -14,8 +12,7 @@ import { ConversationModule } from './conversation/conversation.module';
 import { LikeModule } from './like/like.module';
 import { SavedModule } from './saved/saved.module';
 import { FollowModule } from './follow/follow.module';
-import { UserconversationController } from './userconversation/userconversation.controller';
-import { UserconversationModule } from './userconversation/userconversation.module';
+import { UserConversationModule } from './userconversation/userconversation.module';
 
 @Module({
   imports: [
@@ -32,9 +29,9 @@ import { UserconversationModule } from './userconversation/userconversation.modu
     LikeModule,
     SavedModule,
     FollowModule,
-    UserconversationModule,
+    UserConversationModule,
   ],
-  controllers: [AppController, PostController, UserconversationController],
-  providers: [AppService, PostService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

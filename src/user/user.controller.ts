@@ -4,6 +4,7 @@ import { User } from '@prisma/client';
 import { GetUser } from '../auth/decorator/user.decorator';
 import { UserService } from './user.service';
 import { Request } from 'express';
+import { UserUpdateDTO } from './dto/user.dto';
 
 @Controller('user')
 @UseGuards(MyJwtGuard)
@@ -27,7 +28,7 @@ export class UserController {
     return this.userService.getByCondition(query);
   }
   @Patch(':id')
-  updateUser(@Param('id') id: string, @Body() user) {
+  updateUser(@Param('id') id: string, @Body() user: UserUpdateDTO) {
     return this.userService.updateUser(Number(id), user);
   }
   @Delete(':id')

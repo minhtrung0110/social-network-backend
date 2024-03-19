@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class UserDTO {
   id: number;
@@ -25,7 +25,9 @@ export class CreateUserDTO {
   @IsNotEmpty() lastName: string;
   birthday: string;
   gender: string;
-  @IsNotEmpty() phoneNumber: string;
+  @IsNotEmpty()
+  @Matches(/^(03[2-9]|07[06-9]|08[1-9]|09[0-9]|05[6-9]|01[2-9])\d{7}$/)
+  phoneNumber: string;
   status: number;
 }
 

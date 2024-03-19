@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiResponse } from '../common/model';
 import { User } from '@prisma/client';
-import { UserSearch, UserUpdate } from './dto/user.dto';
+import { UserUpdate } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -47,7 +47,7 @@ export class UserService {
     }
   }
 
-  async getByCondition(params: UserSearch) {
+  async getByCondition(params) {
     //console.log('Parameters:', params);
     try {
       const result = await this.prismaService.user.findMany({

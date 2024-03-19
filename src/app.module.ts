@@ -8,6 +8,12 @@ import { ConfigModule } from '@nestjs/config';
 import { PostController } from './post/post.controller';
 import { PostService } from './post/post.service';
 import { PostModule } from './post/post.module';
+import { CommentModule } from './comment/comment.module';
+import { MessageModule } from './message/message.module';
+import { ConversationModule } from './conversation/conversation.module';
+import { LikeModule } from './like/like.module';
+import { SavedModule } from './saved/saved.module';
+import { FollowModule } from './follow/follow.module';
 
 @Module({
   imports: [
@@ -18,6 +24,12 @@ import { PostModule } from './post/post.module';
     AuthModule,
     UserModule,
     PostModule,
+    CommentModule,
+    MessageModule,
+    ConversationModule,
+    LikeModule,
+    SavedModule,
+    FollowModule,
   ],
   controllers: [AppController, PostController],
   providers: [AppService, PostService],

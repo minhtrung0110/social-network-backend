@@ -4,6 +4,6 @@ import { SavedController } from './saved.controller';
 
 @Module({
   providers: [SavedService],
-  controllers: [SavedController]
+  controllers: [SavedController],
 })
 export class SavedModule {}

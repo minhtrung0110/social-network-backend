@@ -106,7 +106,7 @@ model Saved {
 }
 
 model Follow {
-  id Int @id @default(autoincrement())
+  // id Int @id @default(autoincrement())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -115,6 +115,7 @@ model Follow {
   followId  Int
   follow    User?    @relation("follow_user", fields: [followId], references: [id])
 
+  @@id([userId, followId])
   // More
   @@map("follow")
 }

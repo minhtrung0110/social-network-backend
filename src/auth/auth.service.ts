@@ -69,7 +69,7 @@ export class AuthService {
     }
     delete user.password; //remove 1 field in the object
     const token = await this.signJwtToken(user.id, user.email);
-    return ApiResponse.success(token, 'Login successful');
+    return ApiResponse.success(token.accessToken, 'Login successful');
   }
   // //now convert to an object, not string
   async signJwtToken(userId: number, email: string): Promise<{ accessToken: string }> {
@@ -78,7 +78,7 @@ export class AuthService {
       email,
     };
     const jwtString = await this.jwtService.signAsync(payload, {
-      expiresIn: '10h',
+      expiresIn: '100h',
       secret: this.configService.get('JWT_SECRET'),
     });
     return {

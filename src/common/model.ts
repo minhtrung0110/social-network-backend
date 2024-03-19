@@ -1,3 +1,5 @@
+import { prismaErrors } from './prisma.error';
+
 export class ApiResponse<T> {
   status: number;
   message: string;
@@ -14,6 +16,7 @@ export class ApiResponse<T> {
   }
 
   static error<T>(statusCode: number, message: string): ApiResponse<T> {
-    return new ApiResponse<T>(statusCode, message, null);
+    const errorMessage = prismaErrors[statusCode];
+    return new ApiResponse<T>(statusCode, errorMessage || message, null);
   }
 }

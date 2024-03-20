@@ -26,8 +26,22 @@ services:
       POSTGRES_DB: testdb
     networks:
       - nestjs-network
+  redis:
+      image: redis:latest
+      container_name: redis-social-network
+      restart: always
+      ports:
+        - 6379:6379
+      volumes:
+        - redis_volume_data:/data
+      environment:
+      - REDIS_PASSWORD=Minhtrung0110
+      - REDIS_PORT=6379
+      - REDIS_DATABASES=16
 networks:
   nestjs-network:
+volumes:
+  redis_volume_data:
 #Create container,network,...from "docker composer" file:
 #-d: deamon/background mode
 #docker compose up -d

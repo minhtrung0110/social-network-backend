@@ -7,6 +7,7 @@ import { GoogleStrategy } from './strategy/google.strategy';
 import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { SessionSerializer } from './serializer/session.serializer';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SessionSerializer } from './serializer/session.serializer';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [

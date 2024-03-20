@@ -39,4 +39,11 @@ export class AuthController {
       return { message: 'Not Authenticated' };
     }
   }
+
+  @Get('register/confirm')
+  verifyAccount(@Req() req: Request) {
+    const { query } = req;
+    console.log('Query', query);
+    return this.authService.verifyEmail(query);
+  }
 }

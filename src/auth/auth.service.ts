@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ApiResponse } from '../common/model';
 import { User } from '@prisma/client';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -13,12 +14,18 @@ export class AuthService {
     private prismaService: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private mailService: MailService,
   ) {}
 
   async register(createUserDTO: CreateUserDTO) {
     //generate password to hashedPassword
     const hashedPassword = await argon.hash(createUserDTO.password);
     const keyName = createUserDTO.email.split('@');
+    // send mail
+    const token = Math.floor(1000 + Math.random() * 9000).toString();
+    await this.mailService.sendUserConfirmation(createUserDTO, token);
+
+    // create user
     try {
       //insert data to database
       const user = await this.prismaService.user.create({
@@ -29,8 +36,10 @@ export class AuthService {
           firstName: createUserDTO.firstName,
           lastName: createUserDTO.lastName,
           phoneNumber: createUserDTO.phoneNumber,
-          status: 1,
+          token,
+          status: 0,
         },
+        //0 : disabled - 1 :active 2:block
         //only select id, email, createdAt
         select: {
           id: true,
@@ -52,6 +61,32 @@ export class AuthService {
     //you should add constraint "unique" to user table
   }
 
+  async verifyEmail(param) {
+    try {
+      const { token, email } = param;
+      const user = await this.prismaService.user.findUnique({
+        where: {
+          email,
+        },
+      });
+      console.log(user);
+      if (Number(user.token) === Number(token)) {
+        const res = await this.prismaService.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            token: '',
+            status: 1,
+          },
+        });
+        return ApiResponse.success(res, 'Email verified successfully ');
+      }
+      return ApiResponse.error(400, 'Invalid token');
+    } catch (error) {
+      return ApiResponse.error(error.code, 'Invalid token');
+    }
+  }
   async login(authDTO: AuthDTO) {
     //find user with input email
     const user = await this.prismaService.user.findUnique({

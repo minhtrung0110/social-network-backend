@@ -24,12 +24,12 @@ export class ConversationController {
     return this.conversationService.create(conversation);
   }
 
-  @Patch('id')
+  @Patch(':id')
   updateConversation(@Param('id') id: string, @Body() conversation: UpdateConversationDTO) {
     return this.conversationService.update(Number(id), conversation);
   }
 
-  @Delete('id')
+  @Delete(':id')
   deleteConversation(@Param('id') id) {
     return this.conversationService.delete(Number(id));
   }

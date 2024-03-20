@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiResponse } from '../common/model';
+import { convertNumbers } from '../utils/common';
 
 @Injectable()
 export class MessageService {
   constructor(private prismaService: PrismaService) {}
 
   async filter(params: any) {
+    const filter = convertNumbers(params);
     try {
       const result = await this.prismaService.message.findMany({
-        where: { ...params, status: 1 },
+        where: { ...filter, status: 1 },
         select: {
           id: true,
           content: true,
@@ -23,10 +25,13 @@ export class MessageService {
       return ApiResponse.error(err.code, 'Cannot create message');
     }
   }
-  async create(message) {
+  async create(value) {
+    const message = convertNumbers(value);
+    const data = { ...message, status: 1 };
+    console.log(data);
     try {
       const result = await this.prismaService.message.create({
-        data: message,
+        data: { ...value, status: 1 },
       });
       return ApiResponse.success(result, 'Create message successful');
     } catch (err) {

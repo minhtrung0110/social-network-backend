@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { MyJwtGuard } from '../auth/guard/myjwt.guard';
 import { CommentService } from './comment.service';
 import { CreateCommentDTO, UpdateCommentDTO } from './dto/comment.dto';
@@ -15,15 +15,16 @@ export class CommentController {
     return this.commentService.filter(query);
   }
   @Post()
-  createComment(comment: CreateCommentDTO) {
+  createComment(@Body() comment: CreateCommentDTO) {
+    console.log('comment', comment);
     return this.commentService.create(comment);
   }
-  @Patch('id')
-  updateComment(@Param('id') id: string, comment: UpdateCommentDTO) {
+  @Patch(':id')
+  updateComment(@Param('id') id: string, @Body() comment: UpdateCommentDTO) {
     return this.commentService.update(Number(id), comment);
   }
 
-  @Delete('id')
+  @Delete(':id')
   deleteComment(@Param('id') id: string) {
     return this.commentService.delete(Number(id));
   }

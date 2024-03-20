@@ -5,6 +5,7 @@ import * as argon from 'argon2';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ApiResponse } from '../common/model';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -84,5 +85,50 @@ export class AuthService {
     return {
       accessToken: jwtString,
     };
+  }
+
+  async validateUser(data) {
+    const user: User = await this.prismaService.user.findUnique({ where: { email: data.email } });
+
+    if (user) {
+      return user;
+    }
+    //insert data to database
+    try {
+      const keyName = data.email.split('@');
+      return await this.prismaService.user.create({
+        data: {
+          username: keyName[0],
+          email: data.email,
+          password: '',
+          firstName: data.firstName,
+          lastName: data.lastName,
+          avatar: data.picture,
+          token: data.accessToken,
+          //phoneNumber: data.phoneNumber,
+          status: 1,
+        },
+        //only select id, email, createdAt
+        select: {
+          id: true,
+          email: true,
+          token: true,
+          createdAt: true,
+        },
+      });
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async findUser(id: number) {
+    return this.prismaService.user.findUnique({ where: { id } });
+  }
+  handlerLogin() {
+    return 'handlerLogin';
+  }
+
+  handlerRedirect() {
+    return 'handlerRedirect';
   }
 }

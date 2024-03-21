@@ -8,6 +8,8 @@ import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { SessionSerializer } from './serializer/session.serializer';
 import { MailModule } from '../mail/mail.module';
+import { BullModule } from '@nestjs/bull';
+import { EmailConsumer } from './consumer/email.consumer';
 
 @Module({
   imports: [
@@ -18,6 +20,9 @@ import { MailModule } from '../mail/mail.module';
       envFilePath: '.env',
     }),
     MailModule,
+    BullModule.registerQueue({
+      name: 'send-mail',
+    }),
   ],
   controllers: [AuthController],
   providers: [
@@ -26,6 +31,7 @@ import { MailModule } from '../mail/mail.module';
     GoogleStrategy,
     { provide: 'AUTH_SERVICE', useClass: AuthService },
     SessionSerializer,
+    EmailConsumer,
   ],
 })
 export class AuthModule {}

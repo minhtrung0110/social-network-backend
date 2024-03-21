@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { MessageModule } from './message/message.module';
@@ -13,6 +13,7 @@ import { LikeModule } from './like/like.module';
 import { SavedModule } from './saved/saved.module';
 import { FollowModule } from './follow/follow.module';
 import { UserConversationModule } from './userconversation/userconversation.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -30,6 +31,18 @@ import { UserConversationModule } from './userconversation/userconversation.modu
     SavedModule,
     FollowModule,
     UserConversationModule,
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigService) => ({
+        redis: {
+          host: config.get('REDIS_HOST'),
+          port: config.get('REDIS_PORT'),
+          // username: config.get('REDIS_USERNAME'),
+          password: config.get('REDIS_PASSWORD'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

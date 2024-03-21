@@ -6,7 +6,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ApiResponse } from '../common/model';
 import { User } from '@prisma/client';
-import { MailService } from '../mail/mail.service';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class AuthService {
@@ -14,17 +15,28 @@ export class AuthService {
     private prismaService: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
-    private mailService: MailService,
+    // private mailService: MailService,
+    @InjectQueue('send-mail')
+    private sendMail: Queue,
   ) {}
 
   async register(createUserDTO: CreateUserDTO) {
+    // send mail in queues
+    const token = Math.floor(1000 + Math.random() * 9000).toString();
+    // await this.mailService.sendUserConfirmation(createUserDTO, token);
+    await this.sendMail.add(
+      'register',
+      {
+        user: createUserDTO,
+        token,
+      },
+      {
+        removeOnComplete: true,
+      },
+    );
     //generate password to hashedPassword
     const hashedPassword = await argon.hash(createUserDTO.password);
     const keyName = createUserDTO.email.split('@');
-    // send mail
-    const token = Math.floor(1000 + Math.random() * 9000).toString();
-    await this.mailService.sendUserConfirmation(createUserDTO, token);
-
     // create user
     try {
       //insert data to database

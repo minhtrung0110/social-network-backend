@@ -27,6 +27,8 @@ model User {
   phoneNumber       String?            @db.VarChar(256)
   address           String?            @db.VarChar(256)
   avatar            String?            @db.VarChar(256)
+  twoFA             Boolean            @default(false)
+  isPhoneVerified   Boolean            @default(false)
   status            Int
   createdAt         DateTime?          @default(now())
   updatedAt         DateTime?          @updatedAt
@@ -39,8 +41,26 @@ model User {
   userConservations UserConversation[] @relation("user_in_conversation")
   likes             Like[]             @relation("user_like_post")
   userPosts         Post[]             @relation("user_post")
+  Otp               Otp[]              @relation("otp_user")
   // More
   @@map("users") // users id "table's name" in Postgres SQL
+}
+
+model Otp {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  owner     User      @relation("otp_user", fields: [userId], references: [id])
+  code      String
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+  expiresAt DateTime  @db.Timestamp(5)
+  useCase   UseCase
+}
+
+enum UseCase {
+  LOGIN
+  D2FA
+  PHV
 }
 
 model Post {

@@ -5,9 +5,10 @@ import * as argon from 'argon2';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ApiResponse } from '../common/model';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { getExpiry } from '../utils/common';
 
 @Injectable()
 export class AuthService {
@@ -21,19 +22,6 @@ export class AuthService {
   ) {}
 
   async register(createUserDTO: CreateUserDTO) {
-    // send mail in queues
-    const token = Math.floor(1000 + Math.random() * 9000).toString();
-    // await this.mailService.sendUserConfirmation(createUserDTO, token);
-    await this.sendMail.add(
-      'register',
-      {
-        user: createUserDTO,
-        token,
-      },
-      {
-        removeOnComplete: true,
-      },
-    );
     //generate password to hashedPassword
     const hashedPassword = await argon.hash(createUserDTO.password);
     const keyName = createUserDTO.email.split('@');
@@ -48,7 +36,6 @@ export class AuthService {
           firstName: createUserDTO.firstName,
           lastName: createUserDTO.lastName,
           phoneNumber: createUserDTO.phoneNumber,
-          token,
           status: 0,
         },
         //0 : disabled - 1 :active 2:block
@@ -59,6 +46,28 @@ export class AuthService {
           createdAt: true,
         },
       });
+      // send mail in queues
+      const token = Math.floor(1000 + Math.random() * 9000).toString();
+      const otpPayload: Prisma.OtpUncheckedCreateInput = {
+        userId: user.id,
+        code: token,
+        useCase: 'VE',
+        expiresAt: getExpiry(),
+      };
+      const OTP = await this.prismaService.otp.create({
+        data: otpPayload,
+      });
+      // await this.mailService.sendUserConfirmation(createUserDTO, token);
+      await this.sendMail.add(
+        'register',
+        {
+          user: createUserDTO,
+          token,
+        },
+        {
+          removeOnComplete: true,
+        },
+      );
       return ApiResponse.success(user, 'Register account successfully !');
       //await this.signJwtToken(user.id, user.email);
     } catch (error) {

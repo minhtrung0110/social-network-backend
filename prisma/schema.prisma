@@ -58,9 +58,13 @@ model Otp {
 }
 
 enum UseCase {
+  VE
+  VPH
   LOGIN
   D2FA
-  PHV
+  // LOGIN: This is for OTPs that are sent to users who have 2FA-enabled accounts
+  // D2FA: When a user decides to disable two-factor authentication on their account, we will send an OTP to their phone number. If they verify this, we will disable 2FA on their account. This use case addresses that.
+  // VPH: This is for OTPs that are sent to the user's phone number when they want to verify their phone number on the application.
 }
 
 model Post {

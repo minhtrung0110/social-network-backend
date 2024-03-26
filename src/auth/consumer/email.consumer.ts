@@ -16,17 +16,17 @@ export class EmailConsumer {
     console.log(job.data);
     const time1 = new Date();
     const { user, token } = job.data;
-    const url = `http://localhost:8888/api/v1/auth/register/confirm?email=${user.email}&token=${token}`;
+    //const url = `http://localhost:8888/api/v1/auth/register/confirm?email=${user.email}&token=${token}`;
 
     await this.mailerService.sendMail({
       to: user.email,
       // from: '"Support Team" <support@example.com>', // override default from
-      subject: 'Email Verification - SnapGram',
+      subject: 'Email Verification OTP - SnapGram',
       template: './confirmation', // `.hbs` extension is appended automatically
       context: {
         // ✏️ filling curly brackets with content
         name: `${user.lastName} ${user.firstName}`,
-        url,
+        otp: token,
       },
     });
 

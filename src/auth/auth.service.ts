@@ -5,10 +5,10 @@ import * as argon from 'argon2';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ApiResponse } from '../common/model';
-import { Prisma, User } from '@prisma/client';
+import { Otp, Prisma, User } from '@prisma/client';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { getExpiry } from '../utils/common';
+import { getExpiry, isTokenExpired } from '../utils/common';
 
 @Injectable()
 export class AuthService {
@@ -47,64 +47,69 @@ export class AuthService {
         },
       });
       // send mail in queues
-      const token = Math.floor(1000 + Math.random() * 9000).toString();
-      const otpPayload: Prisma.OtpUncheckedCreateInput = {
-        userId: user.id,
-        code: token,
-        useCase: 'VE',
-        expiresAt: getExpiry(),
-      };
-      const OTP = await this.prismaService.otp.create({
-        data: otpPayload,
-      });
-      // await this.mailService.sendUserConfirmation(createUserDTO, token);
-      await this.sendMail.add(
-        'register',
-        {
-          user: createUserDTO,
-          token,
-        },
-        {
-          removeOnComplete: true,
-        },
-      );
-      return ApiResponse.success(user, 'Register account successfully !');
+      if (user) {
+        const token = Math.floor(1000 + Math.random() * 9000).toString();
+        const otpPayload: Prisma.OtpUncheckedCreateInput = {
+          userId: user.id,
+          code: token,
+          useCase: 'VE',
+          expiresAt: getExpiry(),
+        };
+        const OTP = await this.prismaService.otp.create({
+          data: otpPayload,
+        });
+        if (OTP) {
+          // await this.mailService.sendUserConfirmation(createUserDTO, token);
+          const respond = await this.sendMail.add(
+            'register',
+            {
+              user: createUserDTO,
+              token,
+            },
+            {
+              removeOnComplete: true,
+            },
+          );
+          return ApiResponse.success(respond, 'Send OTP successfully !');
+        }
+        return ApiResponse.error(400, 'Can not save otp');
+      }
+      return ApiResponse.error(400, 'Can not save account');
       //await this.signJwtToken(user.id, user.email);
     } catch (error) {
       if (error.code == 'P2002') {
-        //throw new ForbiddenException(error.message)
-        //for simple
-        //throw new ForbiddenException('User with this email already exists');
         return ApiResponse.error(error.code, 'User with this email already exists');
       }
       return ApiResponse.error(error.code, 'Cannot register account!');
     }
-    //you should add constraint "unique" to user table
   }
 
   async verifyEmail(param) {
     try {
-      const { token, email } = param;
-      const user = await this.prismaService.user.findUnique({
+      const { userId, email, token } = param;
+      const otp: Otp[] = await this.prismaService.otp.findMany({
         where: {
-          email,
+          userId: Number(userId),
+          useCase: 'VE',
         },
       });
-      console.log(user);
-      if (Number(user.token) === Number(token)) {
-        const res = await this.prismaService.user.update({
-          where: {
-            id: user.id,
-          },
-          data: {
-            token: '',
-            status: 1,
-          },
-        });
-        return ApiResponse.success(res, 'Email verified successfully ');
+      if (otp[0]) {
+        //console.log(otp[0]);
+        if (!isTokenExpired(otp[0].expiresAt)) {
+          const res = await this.prismaService.user.update({
+            where: {
+              id: Number(userId),
+            },
+            data: {
+              status: 1,
+            },
+          });
+          return ApiResponse.success(res, 'Email verified successfully ');
+        }
       }
       return ApiResponse.error(400, 'Invalid token');
     } catch (error) {
+      console.log(error);
       return ApiResponse.error(error.code, 'Invalid token');
     }
   }

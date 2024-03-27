@@ -33,6 +33,7 @@ SnapGram provides users with a seamless and engaging experience for sharing visu
 - **Backend Framework:** NestJs
 - **Real-time Communication:** Socket.io
 - **Caching:** Redis
+    - https://selftuts.in/install-redis-using-docker-compose/
 - **Authentication:** JWT Authentication
 - **Database ORM:** Prisma
 - **API Testing:** Pactum

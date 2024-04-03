@@ -70,7 +70,7 @@ export class AuthService {
               removeOnComplete: true,
             },
           );
-          return ApiResponse.success(respond, 'Send OTP successfully !');
+          return ApiResponse.success(user, 'Send OTP successfully !');
         }
         return ApiResponse.error(400, 'Can not save otp');
       }
@@ -86,16 +86,17 @@ export class AuthService {
 
   async verifyEmail(param) {
     try {
-      const { userId, email, token } = param;
+      const { userId, token } = param;
       const otp: Otp[] = await this.prismaService.otp.findMany({
         where: {
           userId: Number(userId),
           useCase: 'VE',
         },
       });
+      console.log('OTP', otp);
       if (otp[0]) {
-        //console.log(otp[0]);
-        if (!isTokenExpired(otp[0].expiresAt)) {
+        //console.log('check', token === otp[0].code, !isTokenExpired(otp[0].expiresAt));
+        if (token === otp[0].code && !isTokenExpired(otp[0].expiresAt)) {
           const res = await this.prismaService.user.update({
             where: {
               id: Number(userId),

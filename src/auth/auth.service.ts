@@ -114,6 +114,7 @@ export class AuthService {
       return ApiResponse.error(error.code, 'Invalid token');
     }
   }
+
   async login(authDTO: AuthDTO) {
     //find user with input email
     const user = await this.prismaService.user.findUnique({
@@ -129,23 +130,42 @@ export class AuthService {
     if (!passwordMatched) {
       //throw new ForbiddenException('Incorrect password');
       return ApiResponse.error(400, 'Incorrect password');
+    } else {
+      delete user.password; //remove 1 field in the object
+      const jwtToken = await this.signJwtToken(user.id, user.email);
+      try {
+        const res = await this.prismaService.session.create({
+          data: {
+            userId: user.id,
+            token: jwtToken.accessToken,
+            expiresAt: new Date(Date.now() + Number(jwtToken.expiresAt) * 1000),
+          },
+        });
+        console.log('Response', res);
+      } catch (err) {
+        console.log(err);
+      }
+      return ApiResponse.success(jwtToken, 'Login successful');
     }
-    delete user.password; //remove 1 field in the object
-    const token = await this.signJwtToken(user.id, user.email);
-    return ApiResponse.success(token.accessToken, 'Login successful');
   }
+
   // //now convert to an object, not string
-  async signJwtToken(userId: number, email: string): Promise<{ accessToken: string }> {
+  async signJwtToken(
+    userId: number,
+    email: string,
+  ): Promise<{ accessToken: string; expiresAt: number }> {
     const payload = {
       sub: userId,
       email,
     };
+    const expiresInInSeconds = 72 * 3600;
     const jwtString = await this.jwtService.signAsync(payload, {
-      expiresIn: '100h',
+      expiresIn: expiresInInSeconds,
       secret: this.configService.get('JWT_SECRET'),
     });
     return {
       accessToken: jwtString,
+      expiresAt: expiresInInSeconds,
     };
   }
 
@@ -166,7 +186,6 @@ export class AuthService {
           firstName: data.firstName,
           lastName: data.lastName,
           avatar: data.picture,
-          token: data.accessToken,
           //phoneNumber: data.phoneNumber,
           status: 1,
         },
@@ -174,7 +193,6 @@ export class AuthService {
         select: {
           id: true,
           email: true,
-          token: true,
           createdAt: true,
         },
       });
@@ -186,6 +204,7 @@ export class AuthService {
   async findUser(id: number) {
     return this.prismaService.user.findUnique({ where: { id } });
   }
+
   handlerLogin() {
     return 'handlerLogin';
   }

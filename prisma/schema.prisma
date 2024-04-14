@@ -19,7 +19,6 @@ model User {
   username          String?            @unique
   email             String             @unique @db.VarChar(256)
   password          String             @db.VarChar(256)
-  token             String?            @db.VarChar(256)
   firstName         String?            @db.VarChar(256)
   lastName          String?            @db.VarChar(256)
   birthday          String?            @db.VarChar(256)
@@ -41,7 +40,9 @@ model User {
   userConservations UserConversation[] @relation("user_in_conversation")
   likes             Like[]             @relation("user_like_post")
   userPosts         Post[]             @relation("user_post")
-  Otp               Otp[]              @relation("otp_user")
+  otp               Otp[]              @relation("otp_user")
+  session           Session[]          @relation("session_user")
+
   // More
   @@map("users") // users id "table's name" in Postgres SQL
 }
@@ -55,6 +56,16 @@ model Otp {
   updatedAt DateTime? @updatedAt
   expiresAt DateTime  @db.Timestamp(5)
   useCase   UseCase
+}
+
+model Session {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation("session_user", fields: [userId], references: [id])
+  token     String
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+  expiresAt DateTime  @db.Timestamp(5)
 }
 
 enum UseCase {
@@ -156,6 +167,7 @@ model Comment {
   // self      Comment  @relation("reply_comment_relation")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   // relationship
   // More
   @@map("comments")
@@ -167,6 +179,7 @@ model Group {
   status    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   // groupUser UserGroup @relation("group")
   // More
   @@map("groups")

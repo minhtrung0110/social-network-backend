@@ -158,7 +158,7 @@ export class AuthService {
       sub: userId,
       email,
     };
-    const expiresInInSeconds = 72 * 3600;
+    const expiresInInSeconds = 3 * 60; //2 * 3600;
     const jwtString = await this.jwtService.signAsync(payload, {
       expiresIn: expiresInInSeconds,
       secret: this.configService.get('JWT_SECRET'),
@@ -203,6 +203,30 @@ export class AuthService {
 
   async findUser(id: number) {
     return this.prismaService.user.findUnique({ where: { id } });
+  }
+
+  async logout(data) {
+    const token = data.split(' ')[1];
+    //const decodeToken = this.jwtService.decode(token);
+    try {
+      const res = await this.prismaService.session.deleteMany({
+        where: { token },
+      });
+      console.log(res);
+      return ApiResponse.success(null, 'Logout successfully');
+    } catch (err) {
+      return ApiResponse.error(400, 'Cannot log out');
+    }
+  }
+
+  async checkExistSession(data) {
+    const token = data.split(' ')[1];
+    try {
+      await this.prismaService.session.findMany({
+        where: { token },
+      });
+      return ApiResponse.success({ session: true }, 'Token is add missed');
+    } catch (err) {}
   }
 
   handlerLogin() {

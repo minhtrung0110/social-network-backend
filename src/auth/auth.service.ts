@@ -70,7 +70,7 @@ export class AuthService {
               removeOnComplete: true,
             },
           );
-          return ApiResponse.success(respond, 'Send OTP successfully !');
+          return ApiResponse.success(user, 'Send OTP successfully !');
         }
         return ApiResponse.error(400, 'Can not save otp');
       }
@@ -86,16 +86,17 @@ export class AuthService {
 
   async verifyEmail(param) {
     try {
-      const { userId, email, token } = param;
+      const { userId, token } = param;
       const otp: Otp[] = await this.prismaService.otp.findMany({
         where: {
           userId: Number(userId),
           useCase: 'VE',
         },
       });
+      console.log('OTP', otp);
       if (otp[0]) {
-        //console.log(otp[0]);
-        if (!isTokenExpired(otp[0].expiresAt)) {
+        //console.log('check', token === otp[0].code, !isTokenExpired(otp[0].expiresAt));
+        if (token === otp[0].code && !isTokenExpired(otp[0].expiresAt)) {
           const res = await this.prismaService.user.update({
             where: {
               id: Number(userId),
@@ -113,6 +114,7 @@ export class AuthService {
       return ApiResponse.error(error.code, 'Invalid token');
     }
   }
+
   async login(authDTO: AuthDTO) {
     //find user with input email
     const user = await this.prismaService.user.findUnique({
@@ -128,23 +130,42 @@ export class AuthService {
     if (!passwordMatched) {
       //throw new ForbiddenException('Incorrect password');
       return ApiResponse.error(400, 'Incorrect password');
+    } else {
+      delete user.password; //remove 1 field in the object
+      const jwtToken = await this.signJwtToken(user.id, user.email);
+      try {
+        const res = await this.prismaService.session.create({
+          data: {
+            userId: user.id,
+            token: jwtToken.accessToken,
+            expiresAt: new Date(Date.now() + Number(jwtToken.expiresAt) * 1000),
+          },
+        });
+        console.log('Response', res);
+      } catch (err) {
+        console.log(err);
+      }
+      return ApiResponse.success(jwtToken, 'Login successful');
     }
-    delete user.password; //remove 1 field in the object
-    const token = await this.signJwtToken(user.id, user.email);
-    return ApiResponse.success(token.accessToken, 'Login successful');
   }
+
   // //now convert to an object, not string
-  async signJwtToken(userId: number, email: string): Promise<{ accessToken: string }> {
+  async signJwtToken(
+    userId: number,
+    email: string,
+  ): Promise<{ accessToken: string; expiresAt: number }> {
     const payload = {
       sub: userId,
       email,
     };
+    const expiresInInSeconds = 3 * 60; //2 * 3600;
     const jwtString = await this.jwtService.signAsync(payload, {
-      expiresIn: '100h',
+      expiresIn: expiresInInSeconds,
       secret: this.configService.get('JWT_SECRET'),
     });
     return {
       accessToken: jwtString,
+      expiresAt: expiresInInSeconds,
     };
   }
 
@@ -165,7 +186,6 @@ export class AuthService {
           firstName: data.firstName,
           lastName: data.lastName,
           avatar: data.picture,
-          token: data.accessToken,
           //phoneNumber: data.phoneNumber,
           status: 1,
         },
@@ -173,7 +193,6 @@ export class AuthService {
         select: {
           id: true,
           email: true,
-          token: true,
           createdAt: true,
         },
       });
@@ -185,6 +204,31 @@ export class AuthService {
   async findUser(id: number) {
     return this.prismaService.user.findUnique({ where: { id } });
   }
+
+  async logout(data) {
+    const token = data.split(' ')[1];
+    //const decodeToken = this.jwtService.decode(token);
+    try {
+      const res = await this.prismaService.session.deleteMany({
+        where: { token },
+      });
+      console.log(res);
+      return ApiResponse.success(null, 'Logout successfully');
+    } catch (err) {
+      return ApiResponse.error(400, 'Cannot log out');
+    }
+  }
+
+  async checkExistSession(data) {
+    const token = data.split(' ')[1];
+    try {
+      await this.prismaService.session.findMany({
+        where: { token },
+      });
+      return ApiResponse.success({ session: true }, 'Token is add missed');
+    } catch (err) {}
+  }
+
   handlerLogin() {
     return 'handlerLogin';
   }

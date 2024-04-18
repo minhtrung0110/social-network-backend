@@ -7,7 +7,6 @@ export class FirebaseService {
   private readonly storage: admin.storage.Storage;
 
   constructor(private readonly configService: ConfigService) {
-    // Kiểm tra xem Firebase đã được khởi tạo chưa trước khi khởi tạo
     if (!admin.apps.length) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const serviceAccount = require('../../../secret_key/social-network-storage-key.json');

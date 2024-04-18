@@ -8,8 +8,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
   app.useGlobalPipes(
+    // global Validation
     new ValidationPipe({
-      whitelist: true,
+      whitelist: true, // only allow attributes was declared in Model DTO
     }),
   );
   app.setGlobalPrefix('api/v1');

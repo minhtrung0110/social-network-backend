@@ -14,6 +14,7 @@ export class AuthController {
     console.log('register', createDTO);
     return this.authService.register(createDTO);
   }
+
   @Post('login')
   login(@Body() authDTO: AuthDTO) {
     return this.authService.login(authDTO);
@@ -45,5 +46,17 @@ export class AuthController {
     const { query } = req;
     console.log('Query', query);
     return this.authService.verifyEmail(query);
+  }
+
+  @Post('logout')
+  logout(@Req() request: Request) {
+    const { headers } = request;
+    return this.authService.logout(headers.authorization);
+  }
+
+  @Post('verify-session')
+  verifySession(@Req() request: Request) {
+    const { headers } = request;
+    return this.authService.checkExistSession(headers.authorization);
   }
 }

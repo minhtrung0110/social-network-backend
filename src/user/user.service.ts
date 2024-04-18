@@ -3,10 +3,41 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ApiResponse } from '../common/model';
 import { User } from '@prisma/client';
 import { UserUpdateDTO } from './dto/user.dto';
+import { isEmpty } from 'lodash';
 
 @Injectable()
 export class UserService {
   constructor(private prismaService: PrismaService) {}
+
+  async getUserByToken(data: string): Promise<any> {
+    const token = data.split(' ')[1];
+    try {
+      const data = await this.prismaService.session.findMany({
+        where: {
+          token,
+        },
+        select: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              avatar: true,
+            },
+          },
+        },
+      });
+
+      if (!isEmpty(data)) {
+        return ApiResponse.success(data, 'Get User Success');
+      }
+      return ApiResponse.error(401, 'User is expired');
+    } catch (err) {
+      return ApiResponse.error(err.code, 'Cannot get data ');
+    }
+  }
 
   async getUserById(id: number): Promise<any> {
     try {

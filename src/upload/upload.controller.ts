@@ -1,15 +1,39 @@
-import { Bind, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Bind,
+  Body,
+  Controller,
+  FileTypeValidator,
+  MaxFileSizeValidator,
+  ParseFilePipe,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
+import { Express } from 'express';
 
 @Controller('upload')
+//@UseGuards(MyJwtGuard)
+//@UseGuards(GoogleGuard)
 export class UploadController {
-  constructor(private readonly uploadservice: UploadService) {}
+  constructor(private readonly uploadService: UploadService) {}
+
   @Post('firebase')
   @UseInterceptors(FileInterceptor('file'))
   @Bind(UploadedFile())
-  uploadFile(file) {
-    console.log(file);
-    return this.uploadservice.uploadFile(file);
+  uploadFileAndPassValidation(
+    @Body() body,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5242880 }),
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|gif)' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.uploadService.uploadFile(file);
   }
 }

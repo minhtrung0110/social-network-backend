@@ -158,7 +158,7 @@ export class AuthService {
       sub: userId,
       email,
     };
-    const expiresInInSeconds = 3 * 60; //2 * 3600;
+    const expiresInInSeconds = 60 * 72 * 60; //2 * 3600;
     const jwtString = await this.jwtService.signAsync(payload, {
       expiresIn: expiresInInSeconds,
       secret: this.configService.get('JWT_SECRET'),
@@ -227,6 +227,24 @@ export class AuthService {
       });
       return ApiResponse.success({ session: true }, 'Token is add missed');
     } catch (err) {}
+  }
+
+  async renewSession(data) {
+    const token = data.split(' ')[1];
+    try {
+      const newExpires = new Date(Date.now() + 60 * 3600 * 1000);
+      const res = await this.prismaService.session.updateMany({
+        where: {
+          token,
+        },
+        data: {
+          expiresAt: newExpires,
+        },
+      });
+      return ApiResponse.success({ expiresAt: newExpires }, 'Session is renewed.');
+    } catch (err) {
+      return ApiResponse.error(400, 'Cannot renew session');
+    }
   }
 
   handlerLogin() {

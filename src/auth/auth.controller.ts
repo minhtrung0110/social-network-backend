@@ -11,7 +11,7 @@ export class AuthController {
   @Post('register') //register a new user
   register(@Body() createDTO: CreateUserDTO) {
     //not validate using class-validator AND class-transformer
-    console.log('register', createDTO);
+    // console.log('register', createDTO);
     return this.authService.register(createDTO);
   }
 
@@ -44,7 +44,7 @@ export class AuthController {
   @Get('register/confirm')
   verifyAccount(@Req() req: Request) {
     const { query } = req;
-    console.log('Query', query);
+    //console.log('Query', query);
     return this.authService.verifyEmail(query);
   }
 
@@ -58,5 +58,13 @@ export class AuthController {
   verifySession(@Req() request: Request) {
     const { headers } = request;
     return this.authService.checkExistSession(headers.authorization);
+  }
+
+  @Post('renewal-session')
+  renewSession(@Req() request: Request) {
+    //const timezoneOffset = new Date().getTimezoneOffset();
+    //(timezoneOffset);
+    const { headers } = request;
+    return this.authService.renewSession(headers.authorization);
   }
 }

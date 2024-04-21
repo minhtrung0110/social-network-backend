@@ -49,6 +49,7 @@ export class PostService {
           },
           status: true,
           createdAt: true,
+          updatedAt: true,
         },
       });
       return ApiResponse.success(res, 'Get post successful');
@@ -87,6 +88,8 @@ export class PostService {
               userId: true,
             },
           },
+          createdAt: true,
+          updatedAt: true,
           status: true,
         },
       });

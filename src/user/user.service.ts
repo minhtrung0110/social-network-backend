@@ -31,7 +31,7 @@ export class UserService {
       });
 
       if (!isEmpty(data)) {
-        return ApiResponse.success(data, 'Get User Success');
+        return ApiResponse.success(data[0].user, 'Get User Success');
       }
       return ApiResponse.error(401, 'User is expired');
     } catch (err) {

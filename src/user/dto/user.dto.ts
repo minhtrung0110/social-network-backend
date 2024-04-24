@@ -4,6 +4,7 @@ import {
   IsEmail,
   IsOptional,
   IsPhoneNumber,
+  IsString,
   Matches,
   MinLength,
 } from 'class-validator';
@@ -39,13 +40,13 @@ export class UserUpdateDTO {
   @IsEmail()
   email: string;
   @IsOptional()
-  @IsAlpha()
+  @IsString()
   firstName: string;
   @IsOptional()
-  @IsAlpha()
+  @IsString()
   lastName: string;
   @IsOptional()
-  @IsDate()
+  @IsString()
   birthday: string;
   @IsOptional()
   gender: string;

@@ -7,14 +7,16 @@ import {
   ParseFilePipe,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 import { Express } from 'express';
+import { MyJwtGuard } from '../auth/guard/myjwt.guard';
 
 @Controller('upload')
-//@UseGuards(MyJwtGuard)
+@UseGuards(MyJwtGuard)
 //@UseGuards(GoogleGuard)
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
@@ -34,6 +36,7 @@ export class UploadController {
     )
     file: Express.Multer.File,
   ) {
+    // console.log('File:', file);
     return this.uploadService.uploadFile(file);
   }
 }

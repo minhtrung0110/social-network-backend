@@ -124,6 +124,18 @@ export class UserService {
           id,
         },
         data: data,
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          birthday: true,
+          gender: true,
+          phoneNumber: true,
+          address: true,
+          avatar: true,
+        },
       });
       return ApiResponse.success(result, 'Update user successfully');
     } catch (err) {

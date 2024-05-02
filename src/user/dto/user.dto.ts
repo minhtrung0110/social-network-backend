@@ -59,3 +59,8 @@ export class UserUpdateDTO {
   @IsOptional()
   avatar: string;
 }
+
+export class UserNameUpdateDTO {
+  @IsOptional()
+  username: string;
+}

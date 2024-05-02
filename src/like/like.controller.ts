@@ -13,6 +13,7 @@ export class LikeController {
     console.log('Params:', createLike);
     return this.likeService.create(Number(createLike.userId), Number(createLike.postId));
   }
+
   @Delete()
   deleteLike(@Body() deleteLike: ModifyLikeDTO) {
     return this.likeService.delete(Number(deleteLike.userId), Number(deleteLike.postId));

@@ -149,6 +149,36 @@ export class AuthService {
     }
   }
 
+  async loginWithoutPassword(authDTO: Omit<AuthDTO, 'password'>): Promise<{
+    accessToken: string;
+    expiresAt: number;
+  }> {
+    //find user with input email
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email: authDTO.email,
+      },
+    });
+    if (!user) {
+      //throw new ForbiddenException('User not found');
+      return null;
+    }
+    const jwtToken = await this.signJwtToken(user.id, user.email);
+    try {
+      const res = await this.prismaService.session.create({
+        data: {
+          userId: user.id,
+          token: jwtToken.accessToken,
+          expiresAt: new Date(Date.now() + Number(jwtToken.expiresAt) * 1000),
+        },
+      });
+      console.log('Response', res);
+    } catch (err) {
+      console.log(err);
+    }
+    return jwtToken;
+  }
+
   // //now convert to an object, not string
   async signJwtToken(
     userId: number,
@@ -193,6 +223,10 @@ export class AuthService {
         select: {
           id: true,
           email: true,
+          username: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
           createdAt: true,
         },
       });
@@ -252,6 +286,9 @@ export class AuthService {
   }
 
   handlerRedirect() {
-    return 'handlerRedirect';
+    // this.prismaService.user.create({
+    //   data:user,
+    // })
+    // return 'handlerRedirect';
   }
 }

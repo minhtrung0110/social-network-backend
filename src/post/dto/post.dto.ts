@@ -5,6 +5,8 @@ export class CreatePostDTO {
   caption: string;
   @IsOptional()
   tags: string;
+  @IsOptional()
+  imageUrl: string;
   @IsNotEmpty()
   @IsIn(['private', 'public', 'follower'])
   scope: 'private' | 'public' | 'follower';
@@ -25,6 +27,7 @@ export class UpdatePostDTO {
   @IsOptional()
   userId: number;
 }
+
 export class SearchPostDTO {
   @IsOptional()
   id?: number;

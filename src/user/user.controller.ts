@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Req, UseGuards } from '@ne
 import { MyJwtGuard } from '../auth/guard/myjwt.guard';
 import { UserService } from './user.service';
 import { Request } from 'express';
-import { UserUpdateDTO } from './dto/user.dto';
+import { UserNameUpdateDTO, UserUpdateDTO } from './dto/user.dto';
 
 @Controller('user')
 @UseGuards(MyJwtGuard)
@@ -39,6 +39,11 @@ export class UserController {
     const result = this.userService.updateUser(Number(id), user);
     //console.log('Check result:', result);
     return result;
+  }
+
+  @Patch('username/:id')
+  updateUserName(@Param('id') id: string, @Body() username: UserNameUpdateDTO) {
+    return this.userService.updateUserName(Number(id), username);
   }
 
   @Delete(':id')

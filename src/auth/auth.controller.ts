@@ -1,12 +1,16 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Redirect, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDTO, CreateUserDTO } from './dto/auth.dto';
 import { GoogleGuard } from './guard/google.guard';
 import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private configService: ConfigService,
+  ) {}
 
   @Post('register') //register a new user
   register(@Body() createDTO: CreateUserDTO) {
@@ -22,14 +26,19 @@ export class AuthController {
 
   @UseGuards(GoogleGuard)
   @Get('google')
-  handlerLogin() {
+  handlerLogin(@Req() req: Request) {
+    const request = req;
     return this.authService.handlerLogin();
   }
 
   @UseGuards(GoogleGuard)
   @Get('google/redirect')
-  handlerRedirect() {
-    return this.authService.handlerRedirect();
+  @Redirect('http://localhost:3000/auth/google', 302)
+  async handlerRedirect(@Req() req: Request) {
+    const userAuth = req.user;
+    const data = await this.authService.loginWithoutPassword(userAuth as Omit<AuthDTO, 'password'>);
+    const accessToken = data?.accessToken ?? '';
+    return { url: `http://localhost:3000/api/auth/google/${accessToken}` };
   }
 
   @Get('status')

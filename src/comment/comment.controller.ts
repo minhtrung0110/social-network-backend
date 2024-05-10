@@ -14,11 +14,19 @@ export class CommentController {
     const { query } = request;
     return this.commentService.filter(query);
   }
+
+  @Get('paginate')
+  paginateComment(@Req() request: Request) {
+    const { query } = request;
+    return this.commentService.paginate(query);
+  }
+
   @Post()
   createComment(@Body() comment: CreateCommentDTO) {
     console.log('comment', comment);
     return this.commentService.create(comment);
   }
+
   @Patch(':id')
   updateComment(@Param('id') id: string, @Body() comment: UpdateCommentDTO) {
     return this.commentService.update(Number(id), comment);

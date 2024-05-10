@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiResponse } from '../common/model';
 import { CreatePostDTO } from './dto/post.dto';
+import { convertRealType } from '../utils/common';
 
 @Injectable()
 export class PostService {
@@ -33,18 +34,23 @@ export class PostService {
               userId: true,
             },
           },
-          comments: {
+          // comments: {
+          //   select: {
+          //     content: true,
+          //     user: {
+          //       select: {
+          //         id: true,
+          //         firstName: true,
+          //         lastName: true,
+          //         username: true,
+          //         avatar: true,
+          //       },
+          //     },
+          //   },
+          // },
+          postSaved: {
             select: {
-              content: true,
-              user: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  username: true,
-                  avatar: true,
-                },
-              },
+              userId: true,
             },
           },
           status: true,
@@ -59,12 +65,13 @@ export class PostService {
   }
 
   async getPostsByCondition(params) {
-    const filter = params.hasOwnProperty('userId')
-      ? {
-          ...params,
-          userId: Number(params.userId),
-        }
-      : params;
+    const { page, perPage, ...filter } = convertRealType(params);
+    //const filter = convertRealType(rest);
+    let paginate = {};
+    if (page && perPage) {
+      paginate = { take: +perPage, skip: perPage * (page - 1) };
+    }
+
     try {
       const res = await this.prismaService.post.findMany({
         where: filter,
@@ -88,10 +95,61 @@ export class PostService {
               userId: true,
             },
           },
+          comments: {
+            select: {
+              id: true,
+            },
+          },
           createdAt: true,
           updatedAt: true,
           status: true,
         },
+        ...paginate,
+      });
+      return ApiResponse.success(res, 'Filter post successful');
+    } catch (e) {
+      return ApiResponse.error(e.code, 'Cannot get Posts');
+    }
+  }
+
+  async getInfinitePosts(params) {
+    const filter = convertRealType(params);
+    const take = filter.perPage;
+    const skip = take * (filter.page - 1);
+    try {
+      const res = await this.prismaService.post.findMany({
+        where: filter,
+        select: {
+          id: true,
+          caption: true,
+          tags: true,
+          imageUrl: true,
+          scope: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              username: true,
+              avatar: true,
+            },
+          },
+          Like: {
+            select: {
+              userId: true,
+            },
+          },
+          comments: {
+            select: {
+              id: true,
+            },
+          },
+          createdAt: true,
+          updatedAt: true,
+          status: true,
+        },
+        take,
+        skip,
       });
       return ApiResponse.success(res, 'Filter post successful');
     } catch (e) {

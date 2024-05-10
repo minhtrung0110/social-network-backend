@@ -13,6 +13,7 @@ export class PostController {
   getPost(@Param('id') id: string) {
     return this.postService.getPost(Number(id));
   }
+
   @Get()
   getAllPosts(@Req() request: Request) {
     const { query } = request;
@@ -23,6 +24,7 @@ export class PostController {
   createPost(@Body() post: CreatePostDTO) {
     return this.postService.create(post);
   }
+
   @Patch(':id')
   updatePost(@Param('id') id: string, @Body() post: UpdatePostDTO) {
     return this.postService.update(Number(id), post);

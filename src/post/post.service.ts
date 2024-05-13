@@ -100,6 +100,11 @@ export class PostService {
               id: true,
             },
           },
+          postSaved: {
+            select: {
+              userId: true,
+            },
+          },
           createdAt: true,
           updatedAt: true,
           status: true,
@@ -194,6 +199,33 @@ export class PostService {
       return ApiResponse.success(result, 'Delete Post Successful');
     } catch (err) {
       return ApiResponse.error(err.code, 'Cannot Delete Posts');
+    }
+  }
+
+  async getRelatedPosts(userId: number) {
+    try {
+      const res = await this.prismaService.post.findMany({
+        where: { userId: Number(userId) },
+        select: {
+          id: true,
+          caption: true,
+          tags: true,
+          imageUrl: true,
+          scope: true,
+          _count: {
+            select: {
+              Like: true,
+              comments: true,
+            },
+          },
+          createdAt: true,
+          updatedAt: true,
+          status: true,
+        },
+      });
+      return ApiResponse.success(res, 'Filter post successful');
+    } catch (e) {
+      return ApiResponse.error(e.code, 'Cannot get Posts');
     }
   }
 }

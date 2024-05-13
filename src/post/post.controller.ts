@@ -20,6 +20,11 @@ export class PostController {
     return this.postService.getPostsByCondition(query);
   }
 
+  @Get('related/:userId')
+  getAllRelatedPosts(@Param('userId') userId: number) {
+    return this.postService.getRelatedPosts(userId);
+  }
+
   @Post()
   createPost(@Body() post: CreatePostDTO) {
     return this.postService.create(post);

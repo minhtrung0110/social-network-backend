@@ -25,6 +25,17 @@ export class UserService {
               firstName: true,
               lastName: true,
               avatar: true,
+              following: {
+                select: {
+                  followId: true,
+                },
+              },
+
+              followedBy: {
+                select: {
+                  userId: true,
+                },
+              },
             },
           },
         },
@@ -234,4 +245,6 @@ export class UserService {
       return ApiResponse.error(err.code, 'Cannot delete user');
     }
   }
+
+  /*--- MORE FEATURES ---*/
 }

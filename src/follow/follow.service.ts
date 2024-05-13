@@ -6,6 +6,15 @@ import { ApiResponse } from '../common/model';
 export class FollowService {
   constructor(private prismaService: PrismaService) {}
 
+  async get() {
+    try {
+      const res = await this.prismaService.follow.findMany();
+      return ApiResponse.success(res, 'All data');
+    } catch (err) {
+      return ApiResponse.error(err.code, 'Cannot get follow');
+    }
+  }
+
   async create(userId: number, followId: number) {
     try {
       const res = await this.prismaService.follow.create({

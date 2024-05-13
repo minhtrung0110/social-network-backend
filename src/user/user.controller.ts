@@ -55,4 +55,8 @@ export class UserController {
   delete(@Param('id') id: string) {
     return this.userService.deleteUser(id);
   }
+
+  /* MORE FEARS */
+  @Get('posts')
+  getRelatedPost(@Body() data: { userId: number }) {}
 }

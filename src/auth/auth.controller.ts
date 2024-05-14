@@ -1,17 +1,21 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Redirect, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDTO, CreateUserDTO } from './dto/auth.dto';
 import { GoogleGuard } from './guard/google.guard';
 import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private configService: ConfigService,
+  ) {}
 
   @Post('register') //register a new user
   register(@Body() createDTO: CreateUserDTO) {
     //not validate using class-validator AND class-transformer
-    console.log('register', createDTO);
+    // console.log('register', createDTO);
     return this.authService.register(createDTO);
   }
 
@@ -22,14 +26,18 @@ export class AuthController {
 
   @UseGuards(GoogleGuard)
   @Get('google')
-  handlerLogin() {
+  handlerLogin(@Req() req: Request) {
     return this.authService.handlerLogin();
   }
 
   @UseGuards(GoogleGuard)
   @Get('google/redirect')
-  handlerRedirect() {
-    return this.authService.handlerRedirect();
+  @Redirect('http://localhost:3000/auth/google', 302)
+  async handlerRedirect(@Req() req: Request) {
+    const userAuth = req.user;
+    const data = await this.authService.loginWithoutPassword(userAuth as Omit<AuthDTO, 'password'>);
+    const accessToken = data?.accessToken ?? '';
+    return { url: `http://localhost:3000/api/auth/google/${accessToken}` };
   }
 
   @Get('status')
@@ -44,7 +52,7 @@ export class AuthController {
   @Get('register/confirm')
   verifyAccount(@Req() req: Request) {
     const { query } = req;
-    console.log('Query', query);
+    //console.log('Query', query);
     return this.authService.verifyEmail(query);
   }
 
@@ -58,5 +66,13 @@ export class AuthController {
   verifySession(@Req() request: Request) {
     const { headers } = request;
     return this.authService.checkExistSession(headers.authorization);
+  }
+
+  @Post('renewal-session')
+  renewSession(@Req() request: Request) {
+    //const timezoneOffset = new Date().getTimezoneOffset();
+    //(timezoneOffset);
+    const { headers } = request;
+    return this.authService.renewSession(headers.authorization);
   }
 }

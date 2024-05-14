@@ -149,6 +149,36 @@ export class AuthService {
     }
   }
 
+  async loginWithoutPassword(authDTO: Omit<AuthDTO, 'password'>): Promise<{
+    accessToken: string;
+    expiresAt: number;
+  }> {
+    //find user with input email
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email: authDTO.email,
+      },
+    });
+    if (!user) {
+      //throw new ForbiddenException('User not found');
+      return null;
+    }
+    const jwtToken = await this.signJwtToken(user.id, user.email);
+    try {
+      const res = await this.prismaService.session.create({
+        data: {
+          userId: user.id,
+          token: jwtToken.accessToken,
+          expiresAt: new Date(Date.now() + Number(jwtToken.expiresAt) * 1000),
+        },
+      });
+      console.log('Response', res);
+    } catch (err) {
+      console.log(err);
+    }
+    return jwtToken;
+  }
+
   // //now convert to an object, not string
   async signJwtToken(
     userId: number,
@@ -158,7 +188,7 @@ export class AuthService {
       sub: userId,
       email,
     };
-    const expiresInInSeconds = 3 * 60; //2 * 3600;
+    const expiresInInSeconds = 60 * 72 * 60; //2 * 3600;
     const jwtString = await this.jwtService.signAsync(payload, {
       expiresIn: expiresInInSeconds,
       secret: this.configService.get('JWT_SECRET'),
@@ -193,6 +223,10 @@ export class AuthService {
         select: {
           id: true,
           email: true,
+          username: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
           createdAt: true,
         },
       });
@@ -229,11 +263,32 @@ export class AuthService {
     } catch (err) {}
   }
 
+  async renewSession(data) {
+    const token = data.split(' ')[1];
+    try {
+      const newExpires = new Date(Date.now() + 60 * 3600 * 1000);
+      const res = await this.prismaService.session.updateMany({
+        where: {
+          token,
+        },
+        data: {
+          expiresAt: newExpires,
+        },
+      });
+      return ApiResponse.success({ expiresAt: newExpires }, 'Session is renewed.');
+    } catch (err) {
+      return ApiResponse.error(400, 'Cannot renew session');
+    }
+  }
+
   handlerLogin() {
     return 'handlerLogin';
   }
 
   handlerRedirect() {
-    return 'handlerRedirect';
+    // this.prismaService.user.create({
+    //   data:user,
+    // })
+    // return 'handlerRedirect';
   }
 }

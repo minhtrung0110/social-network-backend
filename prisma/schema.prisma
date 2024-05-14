@@ -24,6 +24,7 @@ model User {
   birthday          String?            @db.VarChar(256)
   gender            String?            @db.VarChar(256)
   phoneNumber       String?            @db.VarChar(256)
+  bio               String?            @db.VarChar(256)
   address           String?            @db.VarChar(256)
   avatar            String?            @db.VarChar(256)
   twoFA             Boolean            @default(false)
@@ -31,8 +32,8 @@ model User {
   status            Int
   createdAt         DateTime?          @default(now())
   updatedAt         DateTime?          @updatedAt
-  followedBy        Follow[]           @relation("user_followed")
-  following         Follow[]           @relation("follow_user")
+  followedBy        Follow[]           @relation("follow_user") // get UserID
+  following         Follow[]           @relation("user_followed") // get FollowId
   savePost          Saved[]            @relation("save_post_user")
   comments          Comment[]          @relation("user_comment")
   userGroup         UserGroup[]        @relation("user_in_group")
@@ -80,7 +81,7 @@ enum UseCase {
 
 model Post {
   id        Int       @id @default(autoincrement())
-  caption   String    @db.VarChar(256)
+  caption   String    @db.VarChar(10000)
   tags      String?   @db.VarChar(256)
   imageUrl  String?   @db.VarChar(256)
   scope     Scope? //@relation("post_scope", fields: [scopeId], references: [id])

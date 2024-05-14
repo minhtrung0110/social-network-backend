@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiResponse } from '../common/model';
 import { User } from '@prisma/client';
-import { UserUpdateDTO } from './dto/user.dto';
+import { UserNameUpdateDTO, UserUpdateDTO } from './dto/user.dto';
 import { isEmpty } from 'lodash';
 
 @Injectable()
@@ -25,13 +25,24 @@ export class UserService {
               firstName: true,
               lastName: true,
               avatar: true,
+              following: {
+                select: {
+                  followId: true,
+                },
+              },
+
+              followedBy: {
+                select: {
+                  userId: true,
+                },
+              },
             },
           },
         },
       });
 
       if (!isEmpty(data)) {
-        return ApiResponse.success(data, 'Get User Success');
+        return ApiResponse.success(data[0].user, 'Get User Success');
       }
       return ApiResponse.error(401, 'User is expired');
     } catch (err) {
@@ -50,6 +61,50 @@ export class UserService {
       return ApiResponse.success(result, 'Get User By Id Success');
     } catch (err) {
       return ApiResponse.error(err.code, 'Cannot get data ');
+    }
+  }
+
+  async getProfileUserById(id: number): Promise<any> {
+    try {
+      const result = await this.prismaService.user.findUnique({
+        where: {
+          id,
+        },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
+          userPosts: {
+            select: {
+              id: true,
+              imageUrl: true,
+              caption: true,
+            },
+            orderBy: {
+              updatedAt: 'desc',
+            },
+            skip: 0,
+            take: 3,
+          },
+          followedBy: {
+            select: {
+              userId: true,
+            },
+          },
+          following: {
+            select: {
+              userId: true,
+            },
+          },
+        },
+      });
+
+      return ApiResponse.success(result, 'Get Profile User By Id Success');
+    } catch (err) {
+      return ApiResponse.error(err.code, 'Cannot get profile data ');
     }
   }
 
@@ -124,10 +179,56 @@ export class UserService {
           id,
         },
         data: data,
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          birthday: true,
+          gender: true,
+          phoneNumber: true,
+          address: true,
+          avatar: true,
+        },
       });
       return ApiResponse.success(result, 'Update user successfully');
     } catch (err) {
       return ApiResponse.error(err.code, 'Cannot update user');
+    }
+  }
+
+  async updateUserName(id: number, user: UserNameUpdateDTO) {
+    try {
+      const checkExistance = await this.prismaService.user.findMany({
+        where: {
+          username: user.username,
+        },
+      });
+      if (checkExistance.length === 0) {
+        const result = await this.prismaService.user.update({
+          where: {
+            id,
+          },
+          data: { username: user.username },
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            birthday: true,
+            gender: true,
+            phoneNumber: true,
+            address: true,
+            avatar: true,
+          },
+        });
+        return ApiResponse.success(result, 'Update username successfully');
+      }
+      return ApiResponse.error(402, 'Username is exist');
+    } catch (err) {
+      return ApiResponse.error(err.code, 'Cannot update username');
     }
   }
 
@@ -144,4 +245,6 @@ export class UserService {
       return ApiResponse.error(err.code, 'Cannot delete user');
     }
   }
+
+  /*--- MORE FEATURES ---*/
 }

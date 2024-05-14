@@ -13,16 +13,23 @@ export class PostController {
   getPost(@Param('id') id: string) {
     return this.postService.getPost(Number(id));
   }
+
   @Get()
   getAllPosts(@Req() request: Request) {
     const { query } = request;
     return this.postService.getPostsByCondition(query);
   }
 
+  @Get('related/:userId')
+  getAllRelatedPosts(@Param('userId') userId: number) {
+    return this.postService.getRelatedPosts(userId);
+  }
+
   @Post()
   createPost(@Body() post: CreatePostDTO) {
     return this.postService.create(post);
   }
+
   @Patch(':id')
   updatePost(@Param('id') id: string, @Body() post: UpdatePostDTO) {
     return this.postService.update(Number(id), post);

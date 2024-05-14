@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { GoogleStrategy } from './strategy/google.strategy';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { SessionSerializer } from './serializer/session.serializer';
 import { MailModule } from '../mail/mail.module';
@@ -29,6 +29,7 @@ import { EmailConsumer } from './consumer/email.consumer';
     AuthService,
     JwtStrategy,
     GoogleStrategy,
+    ConfigService,
     { provide: 'AUTH_SERVICE', useClass: AuthService },
     SessionSerializer,
     EmailConsumer,

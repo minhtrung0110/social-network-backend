@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Req, UseGuards } from '@ne
 import { MyJwtGuard } from '../auth/guard/myjwt.guard';
 import { UserService } from './user.service';
 import { Request } from 'express';
-import { UserUpdateDTO } from './dto/user.dto';
+import { UserNameUpdateDTO, UserUpdateDTO } from './dto/user.dto';
 
 @Controller('user')
 @UseGuards(MyJwtGuard)
@@ -33,13 +33,30 @@ export class UserController {
     return this.userService.getByCondition(query);
   }
 
+  @Get('profile/:id')
+  getProfileUser(@Param('id') id: string) {
+    return this.userService.getProfileUserById(Number(id));
+  }
+
   @Patch(':id')
   updateUser(@Param('id') id: string, @Body() user: UserUpdateDTO) {
-    return this.userService.updateUser(Number(id), user);
+    //console.log('update user', user);
+    const result = this.userService.updateUser(Number(id), user);
+    //console.log('Check result:', result);
+    return result;
+  }
+
+  @Patch('username/:id')
+  updateUserName(@Param('id') id: string, @Body() username: UserNameUpdateDTO) {
+    return this.userService.updateUserName(Number(id), username);
   }
 
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.userService.deleteUser(id);
   }
+
+  /* MORE FEARS */
+  @Get('posts')
+  getRelatedPost(@Body() data: { userId: number }) {}
 }

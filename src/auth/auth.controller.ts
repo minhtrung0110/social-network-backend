@@ -27,7 +27,6 @@ export class AuthController {
   @UseGuards(GoogleGuard)
   @Get('google')
   handlerLogin(@Req() req: Request) {
-    const request = req;
     return this.authService.handlerLogin();
   }
 

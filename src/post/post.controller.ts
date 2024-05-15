@@ -17,13 +17,17 @@ export class PostController {
   @Get()
   getAllPosts(@Req() request: Request) {
     const { query } = request;
+    if (query.hasOwnProperty('compact')) {
+      const { compact, ...params } = query;
+      return this.postService.getListCompactPosts(params);
+    }
     return this.postService.getPostsByCondition(query);
   }
 
-  @Get('related/:userId')
-  getAllRelatedPosts(@Param('userId') userId: number) {
-    return this.postService.getRelatedPosts(userId);
-  }
+  // @Get('related/:userId')
+  // getAllRelatedPosts(@Param('userId') userId: number) {
+  //   return this.postService.getRelatedPosts(userId);
+  // }
 
   @Post()
   createPost(@Body() post: CreatePostDTO) {

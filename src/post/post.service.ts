@@ -117,48 +117,34 @@ export class PostService {
     }
   }
 
-  async getInfinitePosts(params) {
-    const filter = convertRealType(params);
-    const take = filter.perPage;
-    const skip = take * (filter.page - 1);
+  async getListCompactPosts(params) {
+    const { page, perPage, ...filter } = convertRealType(params);
+    //const filter = convertRealType(rest);
+    let paginate = {};
+    if (page && perPage) {
+      paginate = { take: +perPage, skip: perPage * (page - 1) };
+    }
+
     try {
       const res = await this.prismaService.post.findMany({
         where: filter,
         select: {
           id: true,
-          caption: true,
-          tags: true,
           imageUrl: true,
           scope: true,
-          user: {
+          _count: {
             select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              username: true,
-              avatar: true,
+              Like: true,
+              comments: true,
             },
           },
-          Like: {
-            select: {
-              userId: true,
-            },
-          },
-          comments: {
-            select: {
-              id: true,
-            },
-          },
-          createdAt: true,
           updatedAt: true,
-          status: true,
         },
-        take,
-        skip,
+        ...paginate,
       });
-      return ApiResponse.success(res, 'Filter post successful');
+      return ApiResponse.success(res, 'get data successful');
     } catch (e) {
-      return ApiResponse.error(e.code, 'Cannot get Posts');
+      return ApiResponse.error(e.code, 'cannot get posts');
     }
   }
 

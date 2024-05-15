@@ -38,3 +38,12 @@ export function isTokenExpired(expiry: Date): boolean {
   const currentDate = new Date();
   return expirationDate.getTime() <= currentDate.getTime();
 }
+
+export const findUser = (array: any, value: string) => {
+  return array.filter(
+    item =>
+      item.username.includes(value) ||
+      item.firstName.includes(value) ||
+      item.lastName.includes(value),
+  );
+};

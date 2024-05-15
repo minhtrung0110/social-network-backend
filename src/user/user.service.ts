@@ -64,6 +64,52 @@ export class UserService {
     }
   }
 
+  async getMiniProfileUserById(id: number): Promise<any> {
+    try {
+      const result = await this.prismaService.user.findUnique({
+        where: {
+          id,
+        },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
+          userPosts: {
+            select: {
+              id: true,
+              imageUrl: true,
+              caption: true,
+            },
+            orderBy: {
+              updatedAt: 'desc',
+            },
+            skip: 0,
+            take: 3,
+          },
+          followedBy: {
+            select: {
+              userId: true,
+            },
+          },
+          _count: {
+            select: {
+              followedBy: true,
+              following: true,
+              userPosts: true,
+            },
+          },
+        },
+      });
+
+      return ApiResponse.success(result, 'Get Profile User By Id Success');
+    } catch (err) {
+      return ApiResponse.error(err.code, 'Cannot get profile data ');
+    }
+  }
+
   async getProfileUserById(id: number): Promise<any> {
     try {
       const result = await this.prismaService.user.findUnique({
@@ -94,9 +140,11 @@ export class UserService {
               userId: true,
             },
           },
-          following: {
+          _count: {
             select: {
-              userId: true,
+              followedBy: true,
+              following: true,
+              userPosts: true,
             },
           },
         },
@@ -135,10 +183,16 @@ export class UserService {
 
   async getByCondition(params) {
     //console.log('Parameters:', params);
+    const { searchValue, ...filter } = params;
     try {
       const result = await this.prismaService.user.findMany({
         where: {
-          ...params,
+          ...filter,
+          OR: [
+            { username: { contains: searchValue ?? '' } },
+            { firstName: { contains: searchValue ?? '' } },
+            { lastName: { contains: searchValue ?? '' } },
+          ],
           // NOT: {
           //   status: 0,
           // },

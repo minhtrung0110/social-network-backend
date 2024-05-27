@@ -17,6 +17,8 @@ import { BullModule } from '@nestjs/bull';
 import { UploadService } from './upload/upload.service';
 import { UploadModule } from './upload/upload.module';
 import { FirebaseModule } from './3_party/firebase/firebase.module';
+import { EventsModule } from '../events/event.module';
+import { EventsGateway } from '../events/event.gateway';
 
 @Module({
   imports: [
@@ -34,6 +36,7 @@ import { FirebaseModule } from './3_party/firebase/firebase.module';
     SavedModule,
     FollowModule,
     UserConversationModule,
+    EventsModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({
@@ -50,6 +53,6 @@ import { FirebaseModule } from './3_party/firebase/firebase.module';
     FirebaseModule,
   ],
   controllers: [AppController],
-  providers: [AppService, UploadService],
+  providers: [AppService, UploadService, EventsGateway],
 })
 export class AppModule {}

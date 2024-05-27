@@ -7,6 +7,24 @@ import { convertNumbers } from '../utils/common';
 export class MessageService {
   constructor(private prismaService: PrismaService) {}
 
+  async getAll() {
+    try {
+      const result = await this.prismaService.message.findMany({
+        where: { status: 1 },
+        select: {
+          id: true,
+          content: true,
+          user: true,
+          conversationId: true,
+          createdAt: true,
+        },
+      });
+      return ApiResponse.success(result, 'Create message successful');
+    } catch (err) {
+      return ApiResponse.error(err.code, 'Cannot create message');
+    }
+  }
+
   async filter(params: any) {
     const filter = convertNumbers(params);
     try {
@@ -25,6 +43,7 @@ export class MessageService {
       return ApiResponse.error(err.code, 'Cannot create message');
     }
   }
+
   async create(value) {
     const message = convertNumbers(value);
     const data = { ...message, status: 1 };
